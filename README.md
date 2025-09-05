@@ -1,69 +1,68 @@
-# React + TypeScript + Vite
+# Photo Comparison Tool
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web application for comparing two images and highlighting their differences using AI.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **Upload two images:** Select two images from your local machine.
+*   **AI-powered comparison:** Uses the Google Gemini model to analyze and compare the two images.
+*   **Visual highlighting:** Displays the differences as highlighted regions on the original images.
+*   **Text summary:** Provides a text description of the differences found.
+*   **Responsive design:** Works on both desktop and mobile devices.
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+*   **Frontend:** React, TypeScript
+*   **UI:** Material-UI
+*   **AI:** Google Gemini API
+*   **Build Tool:** Vite
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Prerequisites
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+*   Node.js (v18 or higher)
+*   npm
+
+### Installation
+
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/grzegorz-bach/photo-comparison-2.git
+    cd photo-comparison-2
+    ```
+2.  Install the dependencies:
+    ```bash
+    npm install
+    ```
+
+### Environment Variables
+
+Create a `.env.local` file in the root of the project and add your Google Gemini API key:
+
+```
+VITE_GEMINI_API_KEY=your-api-key
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+You can obtain a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Running the Application
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+This will start the development server at `http://localhost:5173`.
+
+```bash
+npm run dev
+
+## Usage
+
+1.  **Open the application:** Once the development server is running, open your web browser and navigate to `http://localhost:5173`.
+
+2.  **Upload the first image:** In the "Image 1" card, click the "Upload Image" button. This will open a file dialog. Select the first image you want to compare.
+
+3.  **Upload the second image:** In the "Image 2" card, click the "Upload Image" button and select the second image.
+
+4.  **Start the comparison:** After both images are uploaded, click the "Compare Images" button located between the two image sections.
+
+5.  **View the results:** The comparison process may take a few moments. Once complete, the results will appear below the "Compare Images" button. You will see:
+    *   A **summary** of the differences between the two images.
+    *   The two original images with the detected differences **highlighted by red circles**.
