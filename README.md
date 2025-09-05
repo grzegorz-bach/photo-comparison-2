@@ -28,7 +28,7 @@ A web application for comparing two images and highlighting their differences us
 
 1.  Clone the repository:
     ```bash
-    git clone https://github.com/your-username/photo-comparison-2.git
+    git clone https://github.com/grzegorz-bach/photo-comparison-2.git
     cd photo-comparison-2
     ```
 2.  Install the dependencies:
@@ -43,6 +43,8 @@ Create a `.env` file in the root of the project and add your Google Gemini API k
 ```
 VITE_GEMINI_API_KEY=your-api-key
 ```
+
+You can obtain a Gemini API key from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
 ### Running the Application
 
