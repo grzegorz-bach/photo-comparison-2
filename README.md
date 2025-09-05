@@ -48,11 +48,10 @@ You can obtain a Gemini API key from [Google AI Studio](https://aistudio.google.
 
 ### Running the Application
 
+This will start the development server at `http://localhost:5173`.
+
 ```bash
 npm run dev
-```
-
-This will start the development server at `http://localhost:5173`.
 
 ## Usage
 
