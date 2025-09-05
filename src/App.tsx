@@ -1,5 +1,24 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import {
+  Container,
+  Typography,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Box,
+  AppBar,
+  Toolbar,
+  createTheme,
+  ThemeProvider,
+  CssBaseline,
+  useMediaQuery,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import CameraIcon from '@mui/icons-material/Camera';
+import ImageIcon from '@mui/icons-material/Image';
 
 interface Difference {
   description: string;
@@ -18,6 +37,10 @@ const App = () => {
   const [image2URL, setImage2URL] = useState<string | null>(null);
   const [result, setResult] = useState<ComparisonResult | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error' | 'warning' | 'info'>('info');
+
 
   const canvas1Ref = useRef<HTMLCanvasElement | null>(null);
   const canvas2Ref = useRef<HTMLCanvasElement | null>(null);
@@ -44,7 +67,7 @@ const App = () => {
             const centerX = (x / 100 + (width / 100) / 2) * canvas.width;
             const centerY = (y / 100 + (height / 100) / 2) * canvas.height;
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY, 10, 0, 2 * Math.PI);
             ctx.fill();
           }
         });
@@ -82,7 +105,9 @@ const App = () => {
 
   const handleSubmit = async () => {
     if (!image1 || !image2) {
-      alert('Please upload both images.');
+      setSnackbarMessage('Please upload both images.');
+      setSnackbarSeverity('warning');
+      setSnackbarOpen(true);
       return;
     }
 
@@ -132,57 +157,164 @@ const App = () => {
       const parsedResult: ComparisonResult = JSON.parse(jsonString);
 
       setResult(parsedResult);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('An error occurred while processing the images.');
+      if (error.message.includes('503')) {
+        setSnackbarMessage('The model is currently overloaded. Please try again later.');
+      } else {
+        setSnackbarMessage('An error occurred while processing the images.');
+      }
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: prefersDarkMode ? 'dark' : 'light',
+        },
+      }),
+    [prefersDarkMode],
+  );
+
+  const ImagePlaceholder = () => (
+    <Box
+      sx={{
+        minHeight: 300,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'action.hover',
+        borderRadius: 1,
+        mt: 2,
+      }}
+    >
+      <ImageIcon sx={{ fontSize: 50, color: 'text.disabled' }} />
+    </Box>
+  );
+
   return (
-    <div>
-      <h1>Image Comparison</h1>
-      <div style={{ display: 'flex', gap: '1rem' }}>
-        <div>
-          <label htmlFor="image1">Image 1</label>
-          <input
-            type="file"
-            id="image1"
-            accept="image/*"
-            onChange={handleImage1Change}
-          />
-        </div>
-        <div>
-          <label htmlFor="image2">Image 2</label>
-          <input
-            type="file"
-            id="image2"
-            accept="image/*"
-            onChange={handleImage2Change}
-          />
-        </div>
-      </div>
-      <button onClick={handleSubmit} disabled={loading} style={{ marginTop: '1rem' }}>
-        {loading ? 'Comparing...' : 'Compare Images'}
-      </button>
-      {result && (
-        <div style={{ marginTop: '1rem' }}>
-          <h2>Comparison Result:</h2>
-          <p>{result.summary}</p>
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <div style={{ flex: 1 }}>
-              <h3>Image 1 with Differences</h3>
-              <canvas ref={canvas1Ref} style={{ maxWidth: '100%', height: 'auto' }} />
-            </div>
-            <div style={{ flex: 1 }}>
-              <h3>Image 2 with Differences</h3>
-              <canvas ref={canvas2Ref} style={{ maxWidth: '100%', height: 'auto' }} />
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <AppBar position="sticky">
+        <Toolbar>
+          <CameraIcon sx={{ mr: 2 }} />
+          <Typography variant="h6">Image Comparison</Typography>
+        </Toolbar>
+      </AppBar>
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Box
+          display="grid"
+          gridTemplateColumns={{ xs: '1fr', md: '1fr 1fr' }}
+          gap={4}
+        >
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Image 1
+              </Typography>
+              <Button variant="contained" component="label">
+                Upload Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleImage1Change}
+                />
+              </Button>
+              {image1URL ? (
+                <Box mt={2}>
+                  <img src={image1URL} alt="Image 1" style={{ maxWidth: '100%' }} />
+                </Box>
+              ) : (
+                <ImagePlaceholder />
+              )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Image 2
+              </Typography>
+              <Button variant="contained" component="label">
+                Upload Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleImage2Change}
+                />
+              </Button>
+              {image2URL ? (
+                <Box mt={2}>
+                  <img src={image2URL} alt="Image 2" style={{ maxWidth: '100%' }} />
+                </Box>
+              ) : (
+                <ImagePlaceholder />
+              )}
+            </CardContent>
+          </Card>
+        </Box>
+        <Box sx={{ my: 4, textAlign: 'center' }}>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={handleSubmit}
+            disabled={loading || !image1 || !image2}
+          >
+            {loading ? <CircularProgress size={24} /> : 'Compare Images'}
+          </Button>
+        </Box>
+        {result && (
+          <Card>
+            <CardContent>
+              <Typography variant="h5" gutterBottom>
+                Comparison Result
+              </Typography>
+              <Typography variant="body1">{result.summary}</Typography>
+              <Box
+                display="grid"
+                gridTemplateColumns={{ xs: '1fr', md: '1fr 1fr' }}
+                gap={4}
+                sx={{ mt: 2 }}
+              >
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Image 1 with Differences
+                  </Typography>
+                  <canvas ref={canvas1Ref} style={{ maxWidth: '100%', height: 'auto' }} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Image 2 with Differences
+                  </Typography>
+                  <canvas ref={canvas2Ref} style={{ maxWidth: '100%', height: 'auto' }} />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        )}
+      </Container>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </ThemeProvider>
   );
 };
 
