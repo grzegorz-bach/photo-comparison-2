@@ -38,7 +38,7 @@ A web application for comparing two images and highlighting their differences us
 
 ### Environment Variables
 
-Create a `.env` file in the root of the project and add your Google Gemini API key:
+Create a `.env.local` file in the root of the project and add your Google Gemini API key:
 
 ```
 VITE_GEMINI_API_KEY=your-api-key
